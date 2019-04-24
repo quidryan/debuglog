@@ -20,4 +20,6 @@ dependencies {
   // Needed to register Subplugin as a service
   compileOnly "com.google.auto.service:auto-service:1.0-rc4"
   kapt "com.google.auto.service:auto-service:1.0-rc4"
+
+  testImplementation "junit:junit:4.12"
 }
