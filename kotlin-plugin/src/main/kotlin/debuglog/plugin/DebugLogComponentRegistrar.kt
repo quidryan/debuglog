@@ -1,6 +1,8 @@
 package debuglog.plugin
 
 import com.google.auto.service.AutoService
+import debuglog.plugin.ConfigurationKeys.KEY_ANNOTATIONS
+import debuglog.plugin.ConfigurationKeys.KEY_ENABLED
 import org.jetbrains.kotlin.codegen.extensions.ClassBuilderInterceptorExtension
 import org.jetbrains.kotlin.com.intellij.mock.MockProject
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
