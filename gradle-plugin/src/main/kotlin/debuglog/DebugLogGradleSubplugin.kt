@@ -3,6 +3,7 @@ package debuglog
 import com.google.auto.service.AutoService
 import org.gradle.api.Project
 import org.gradle.api.tasks.compile.AbstractCompile
+import org.jetbrains.kotlin.gradle.dsl.KotlinCommonOptions
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinGradleSubplugin
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
@@ -20,7 +21,7 @@ class DebugLogGradleSubplugin : KotlinGradleSubplugin<AbstractCompile> {
       javaCompile: AbstractCompile?,
       variantData: Any?,
       androidProjectHandler: Any?,
-      kotlinCompilation: KotlinCompilation?
+      kotlinCompilation: KotlinCompilation<KotlinCommonOptions>?
   ): List<SubpluginOption> {
     val extension = project.extensions.findByType(DebugLogGradleExtension::class.java)
         ?: DebugLogGradleExtension()

@@ -1,6 +1,7 @@
 package debuglog.plugin
 
 import com.google.auto.service.AutoService
+import org.jetbrains.kotlin.compiler.plugin.AbstractCliOption
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.config.CompilerConfiguration
@@ -19,24 +20,24 @@ class DebugLogCommandLineProcessor : CommandLineProcessor {
    */
   override val pluginOptions: Collection<CliOption> = listOf(
       CliOption(
-          name = "enabled", valueDescription = "<true|false>",
+          optionName = "enabled", valueDescription = "<true|false>",
           description = "whether to enable the debuglog plugin or not"
       ),
       CliOption(
-          name = "debugLogAnnotation", valueDescription = "<fqname>",
+          optionName = "debugLogAnnotation", valueDescription = "<fqname>",
           description = "fully qualified name of the annotation(s) to use as debug-log",
           required = true, allowMultipleOccurrences = true
       )
   )
 
   override fun processOption(
-      option: CliOption,
-      value: String,
-      configuration: CompilerConfiguration
-  ) = when (option.name) {
+          option: AbstractCliOption,
+          value: String,
+          configuration: CompilerConfiguration
+  ) = when (option.optionName) {
     "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())
     "debugLogAnnotation" -> configuration.appendList(KEY_ANNOTATIONS, value)
-    else -> error("Unexpected config option ${option.name}")
+    else -> error("Unexpected config option ${option.optionName}")
   }
 }
 
