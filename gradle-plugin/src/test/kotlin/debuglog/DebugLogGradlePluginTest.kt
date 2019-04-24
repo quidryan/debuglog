@@ -8,6 +8,7 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.containsString
 
 import org.junit.Assert.assertThat
+import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Rule
 import org.junit.Test
@@ -18,6 +19,11 @@ import java.io.File
 
 @FixMethodOrder(MethodSorters.JVM)
 class DebugLogGradlePluginTest {
+
+
+    @Before
+    fun setup() {
+    }
     @Test
     fun `debuglog can be configured`() {
 
@@ -34,6 +40,45 @@ class DebugLogGradlePluginTest {
         assertThat(
                 build("model", "-q").output.trimEnd(),
                 containsString("Root project")) // No exception thrown
+    }
+
+    @Test
+    fun `debuglog errors if not configured from Groovy`() {
+
+        givenGroovyBuildScript("""
+            plugins {
+                id "debuglog.plugin"
+                id 'org.jetbrains.kotlin.jvm' version '1.3.30'
+            }
+            repositories { jcenter() }
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib"
+            }
+            debugLog {
+                enabled = false
+                annotations = ["java.lang.Deprecated"]
+            }
+        """)
+
+        givenSource("""
+            package debuglogtest
+
+            import java.lang.Deprecated
+
+            class Main {
+                @Deprecated fun addOne(n: Int): Int = n + 1
+            }
+
+            fun main(args : Array<String>) {
+                println(Main().addOne(3))
+            }
+
+        """.trimIndent())
+
+        val message = "DebugLog is enabled, but no annotations were set"
+        assertThat(
+                build("assemble", "-q", "--stacktrace", "--debug").output.trimEnd(),
+                equalTo(message))
     }
 
     @Test
@@ -117,18 +162,28 @@ class DebugLogGradlePluginTest {
     }
 
     private
-    fun build(vararg arguments: String): BuildResult =
-            GradleRunner
-                    .create()
-                    .withProjectDir(temporaryFolder.root)
-                    .withPluginClasspath()
-                    .withArguments(*arguments)
-            // .withDebug(true) // Will fail with "Type org.gradle.api.tasks.SourceSet not present"
-                    .build()
+    fun build(vararg arguments: String): BuildResult {
+        val pluginClasspathResource = DebugLogGradlePluginTest::class.java.classLoader.getResource("plugin-classpath.txt").readText()
+        val pluginClasspath = pluginClasspathResource.lines().map { File(it) }
+
+        return GradleRunner
+                .create()
+                .withProjectDir(temporaryFolder.root)
+                .withPluginClasspath(pluginClasspath)
+                .withArguments(*arguments)
+                .withDebug(true) // Will fail with "Type org.gradle.api.tasks.SourceSet not present"
+                .build()
+    }
 
     private
     fun givenBuildScript(script: String) =
             newFile("build.gradle.kts").apply {
+                writeText(script)
+            }
+
+    private
+    fun givenGroovyBuildScript(script: String) =
+            newFile("build.gradle").apply {
                 writeText(script)
             }
 
